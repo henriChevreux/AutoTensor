@@ -12,28 +12,19 @@ import re
 import numpy as np
 from datetime import datetime
 from gpt_api import get_gpt_reccomendation_from_tb
-
+from tensorvision import TensorVision
+from prompts import get_intro_prompt, get_cmd_prompt
 try:
     from tensorboard.backend.event_processing import event_accumulator
 except ImportError:
     print("Warning: TensorBoard not installed. Advanced analytics will be limited.")
     event_accumulator = None
 
-from tensorvision import TensorVision
-
 class TrainingAgent(cmd.Cmd):
     """Interactive command-line agent for configuring and training FashionMNIST models"""
     
-    intro = """
-    =================================================================
-    🤖 FashionMNIST Training Agent 🤖
-    =================================================================
-    Welcome! I can help you configure and train FashionMNIST models.
-    Type 'help' or '?' to list commands.
-    Type 'train' to train with current settings.
-    Type 'exit' to quit.
-    """
-    prompt = '(agent) '
+    intro = get_intro_prompt()
+    prompt = get_cmd_prompt()
     
     # Default hyperparameters
     default_hyperparams = {
@@ -126,6 +117,52 @@ class TrainingAgent(cmd.Cmd):
         
         Usage: analysis"""
         self._analyze_model_performance()
+
+    def do_generate_model(self, arg):
+        """Generate a new model code based on TensorBoard analysis and save it as a Python file.
+        
+        If no filename is provided, defaults to 'generated_model.py'"""
+        self._generate_model_code_from_tb()
+    
+    def _generate_model_code_from_tb(
+            self, 
+            output_filename = 'generated_model.py', 
+            log_dir="tb_logs", 
+            experiment_dir="fashion_mnist"):
+        """Generate a new model based on TensorBoard analysis and save it as a Python file.
+        If no filename is provided, defaults to 'generated_model.py'"""
+
+        print(f"\nAnalyzing TensorBoard logs and generating improved model code...")
+
+        # Get TensorBoard log directories
+        log_dir = "tb_logs"
+        experiment_dir = "fashion_mnist"
+        version_dirs = glob.glob(f"{log_dir}/{experiment_dir}/*")
+
+        if not version_dirs:
+            print("No TensorBoard logs found. Cannot generate model without training data.")
+            return
+
+        # Generate model code from GPT
+        from gpt_api import get_gpt_model_code_from_tb_with_current_model, save_model_code_to_file
+
+        try:
+            model_code = get_gpt_model_code_from_tb_with_current_model(version_dirs)
+
+            # Save the code to a file
+            saved_file = save_model_code_to_file(model_code, output_filename)
+
+            if saved_file:
+                print(f"\n✅ Model code generated and saved to: {saved_file}")
+                print("\nYou can now:")
+                print(f"1. Review the code in {saved_file}")
+                print("2. Import and use the model in your training pipeline")
+                print("3. Run 'train' to test the new model")
+            else:
+                print("❌ Failed to save model code")
+
+        except Exception as e:
+            print(f"❌ Error generating model: {e}")
     
     def _analyze_model_performance(self):
         """Analyze model performance across experiments and identify patterns.

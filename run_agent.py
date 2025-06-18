@@ -8,14 +8,14 @@ import os
 
 def main():
     try:
-        from ai_agent import HyperparameterAgent
+        from ai_agent import TrainingAgent
     except ImportError:
         print("Error: Could not import the HyperparameterAgent.")
         print("Make sure you have the ai_agent.py file in the current directory.")
         sys.exit(1)
     
     print("Starting FashionMNIST Training Agent...")
-    agent = HyperparameterAgent()
+    agent = TrainingAgent()
     agent.cmdloop()
 
 if __name__ == "__main__":

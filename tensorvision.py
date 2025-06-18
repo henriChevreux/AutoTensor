@@ -9,7 +9,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping, LearningRateMonitor
 
 from data import FashionMNISTDataModule
-from model import FashionMNISTCNN
+from generated_model import FashionMNISTCNN
 # from callbacks import FeatureVisualizationCallback, GradientHistogramCallback, ModelExplainabilityCallback
 
 class TensorVision:
