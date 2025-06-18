@@ -11,7 +11,7 @@ import glob
 import re
 import numpy as np
 from datetime import datetime
-from gpt_api import get_gpt_reccomendation_from_tb
+from gpt_api import get_gpt_reccomendation_from_tb, get_gpt_model_code_from_tb_with_current_model, save_model_code_to_file
 from tensorvision import TensorVision
 from prompts import get_intro_prompt, get_cmd_prompt
 try:
@@ -26,28 +26,8 @@ class TrainingAgent(cmd.Cmd):
     intro = get_intro_prompt()
     prompt = get_cmd_prompt()
     
-    # Default hyperparameters
-    default_hyperparams = {
-        # Data parameters
-        "data_dir": "./data",
-        "batch_size": 128,
-        "num_workers": 4,
-        
-        # Model parameters
-        "learning_rate": 0.001,
-        "weight_decay": 1e-5,
-        "dropout_rate": 0.2,
-        
-        # Training parameters
-        "max_epochs": 1,
-        "accelerator": "auto",
-        "precision": "32-true",
-        "checkpoint_dir": "checkpoints",
-    }
-    
     def __init__(self):
         super().__init__()
-        self.hyperparams = self.default_hyperparams.copy()
         self.results = None
         self.pipeline = None
     
@@ -144,8 +124,6 @@ class TrainingAgent(cmd.Cmd):
             return
 
         # Generate model code from GPT
-        from gpt_api import get_gpt_model_code_from_tb_with_current_model, save_model_code_to_file
-
         try:
             model_code = get_gpt_model_code_from_tb_with_current_model(version_dirs)
 
