@@ -87,8 +87,7 @@ class TrainingAgent(cmd.Cmd):
             
         results = get_gpt_reccomendation_from_tb(version_dirs)
 
-        # print the GPT results
-        print(results)
+        self.save_analysis_to_file(analysis_dir="analysis_results", version_dirs=version_dirs, results=results)
         
         return results
     
@@ -151,6 +150,68 @@ class TrainingAgent(cmd.Cmd):
         
         # Analyze TensorBoard logs
         tb_analysis = self._analyze_tensorboard_logs()
+    
+    def save_analysis_to_file(self, analysis_dir="analysis_results", version_dirs=None, results=None):
+        """Save the analysis to a file"""
+
+        # Create output directory for analysis results
+        os.makedirs(analysis_dir, exist_ok=True)
+
+        # Generate timestamp for unique filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        analysis_file = f"{analysis_dir}/tensorboard_analysis_{timestamp}.txt"
+
+        try:
+            # Save results to file with proper formatting
+            with open(analysis_file, 'w', encoding='utf-8') as f:
+                f.write("=" * 80 + "\n")
+                f.write("TENSORBOARD ANALYSIS RESULTS\n")
+                f.write("=" * 80 + "\n\n")
+
+                f.write(f"Analysis Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(f"TensorBoard Logs Analyzed: {len(version_dirs)} directories\n\n")
+
+                f.write("Log Directories:\n")
+                for i, dir_path in enumerate(version_dirs, 1):
+                    f.write(f"  {i}. {dir_path}\n")
+                f.write("\n")
+
+                f.write("-" * 80 + "\n")
+                f.write("GPT ANALYSIS AND RECOMMENDATIONS\n")
+                f.write("-" * 80 + "\n\n")
+
+                # Write the GPT results with proper formatting
+                if results:
+                    # Normalize line breaks to ensure proper formatting
+                    formatted_results = results.replace('\r\n', '\n').replace('\r', '\n')
+                    f.write(formatted_results)
+
+                    # Ensure the file ends with a newline
+                    if not formatted_results.endswith('\n'):
+                        f.write('\n')
+                else:
+                    f.write("No analysis results available.\n")
+
+                f.write("\n" + "=" * 80 + "\n")
+                f.write("END OF ANALYSIS\n")
+                f.write("=" * 80 + "\n")
+
+            print(f"\n✅ TensorBoard analysis saved to: {analysis_file}")
+            print(f"📄 Analysis file contains {len(results) if results else 0} characters")
+
+            # Also print the results to console
+            print("\n" + "=" * 50)
+            print("GPT ANALYSIS RESULTS")
+            print("=" * 50)
+            print(results)
+
+        except Exception as e:
+            print(f"❌ Error saving analysis to file: {e}")
+            # Still print results to console even if file saving fails
+            print("\n" + "=" * 50)
+            print("GPT ANALYSIS RESULTS")
+            print("=" * 50)
+            print(results)
 
 def main():
     parser = argparse.ArgumentParser(description="FashionMNIST Training Agent")
