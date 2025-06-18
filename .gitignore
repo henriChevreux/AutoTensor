@@ -19,3 +19,4 @@ wandb/
 .env.test.local
 .env.production.local
 .venv/
+analysis_results/
