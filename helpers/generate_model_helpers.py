@@ -2,16 +2,15 @@ import os
 import glob
 from gpt_api import get_gpt_model_code_from_tb_with_current_model
 import logging
-from datetime import datetime
+from helpers.helpers import generate_filename
 
 def generate_model_pipeline(
         output_folder="models",
-        output_filename = 'generated_model.py', 
         log_dir="tb_logs", 
-        experiment_dir="fashion_mnist",
+        experiment_name="fashion_mnist",
         current_model_path="model.py"):
     """Generate a new model based on TensorBoard analysis and save it as a Python file.
-    If no filename is provided, defaults to 'generated_model.py'"""
+    """
 
     print(f"\nAnalyzing TensorBoard logs and generating improved model code...")
 
@@ -20,7 +19,8 @@ def generate_model_pipeline(
     logging.getLogger('tensorboard.backend.event_processing').setLevel(logging.ERROR)
 
     # Get TensorBoard log directories
-    version_dirs = glob.glob(f"{log_dir}/{experiment_dir}/*")
+    version_dirs = glob.glob(f"{log_dir}/{experiment_name}/*")
+    output_folder = os.path.join(output_folder, experiment_name)
 
     if not version_dirs:
         print("No TensorBoard logs found. Cannot generate model without training data.")
@@ -31,12 +31,10 @@ def generate_model_pipeline(
         model_code = get_gpt_model_code_from_tb_with_current_model(version_dirs, current_model_path)
 
         # Create output folder for the model
-        output_folder = os.path.join(output_folder, experiment_dir)
         os.makedirs(output_folder, exist_ok=True)
 
-        # Create timestamp for the model
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_filename = f"{timestamp}_{output_filename}"
+        # Generate filename for the model
+        output_filename = generate_filename(output_folder, filename_prefix="model", extension="py")
 
         # Save the code to a file in the output folder
         saved_file = save_model_code_to_file(model_code, output_folder, output_filename)

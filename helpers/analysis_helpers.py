@@ -3,32 +3,40 @@ from datetime import datetime
 from gpt_api import get_gpt_analysis_from_tb
 import glob
 import logging
+from pathlib import Path
+from helpers.helpers import generate_filename
 
-def analysis_pipeline(log_dir="tb_logs", experiment_dir="fashion_mnist", analysis_dir="analysis_results"):
+def analysis_pipeline(log_dir="tb_logs", experiment_name="fashion_mnist", analysis_dir="analysis_results"):
     """Main pipeline function for the analysis agent command. 
     Analyze model performance across experiments and identify patterns.
     Args:
         log_dir: Path to TensorBoard logs.
-        experiment_dir: Path to specific experiment directory. If None, analyze all.
+        experiment_name: Name of the experiment.
         analysis_dir: Path to save the analysis results.
 
     Returns:
         Dictionary with performance analysis and recommendations
     """
 
+    experiment_dir = f"{log_dir}/{experiment_name}"
+    output_dir = f"{analysis_dir}/{experiment_name}"
+
     # Suppress TensorBoard logging of warnings to avoid cluttering the output
     logging.getLogger('tensorboard').setLevel(logging.ERROR)
     logging.getLogger('tensorboard.backend.event_processing').setLevel(logging.ERROR)
 
     # Find TensorBoard log directories for the given experiment
-    version_dirs = glob.glob(f"{log_dir}/{experiment_dir}/*")
+    version_dirs = glob.glob(f"{experiment_dir}/*")
     print(version_dirs)
         
     # Analyze TensorBoard logs using GPT
     tb_analysis = get_tb_logs_analysis(version_dirs)
 
+    # Generate filename for the analysis
+    analysis_filename = generate_filename(output_dir, filename_prefix="analysis", extension="txt")
+
     # Save analysis to file
-    save_analysis_to_file(analysis_dir=analysis_dir, version_dirs=version_dirs, results=tb_analysis)
+    save_analysis_to_file(output_dir=output_dir, version_dirs=version_dirs, results=tb_analysis, filename=analysis_filename)
 
     return tb_analysis
 
@@ -51,13 +59,14 @@ def get_tb_logs_analysis(version_dirs):
     
     return results
 
-def save_analysis_to_file(analysis_dir="analysis_results", version_dirs=None, results=None):
+
+
+def save_analysis_to_file(output_dir, version_dirs=None, results=None, filename="analysis.txt"):
     """Save the analysis to a file"""
     # Create output directory for analysis results
-    os.makedirs(analysis_dir, exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
     # Generate timestamp for unique filename
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    analysis_file = f"{analysis_dir}/tensorboard_analysis_{timestamp}.txt"
+    analysis_file = f"{output_dir}/{filename}"
     try:
         # Save results to file with proper formatting
         with open(analysis_file, 'w', encoding='utf-8') as f:
