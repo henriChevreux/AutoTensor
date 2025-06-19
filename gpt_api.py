@@ -43,7 +43,7 @@ def get_gpt_analysis_from_tb(context_file_paths):
 
     return completion.choices[0].message.content
 
-def get_gpt_model_code_from_tb_with_current_model(context_file_paths, current_model_path="model.py"):
+def get_gpt_model_code_from_tb_with_current_model(context_file_paths, current_model_path):
     """Get model code from GPT based on TensorBoard analysis and current model.
     
     Args:

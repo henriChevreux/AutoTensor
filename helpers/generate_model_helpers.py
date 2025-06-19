@@ -1,19 +1,23 @@
 import os
 import glob
 from gpt_api import get_gpt_model_code_from_tb_with_current_model
+import logging
 
 def generate_model_pipeline(
-        output_filename = 'generated_model_v2.py', 
+        output_filename = 'generated_model.py', 
         log_dir="tb_logs", 
-        experiment_dir="fashion_mnist"):
+        experiment_dir="fashion_mnist",
+        current_model_path="model.py"):
     """Generate a new model based on TensorBoard analysis and save it as a Python file.
     If no filename is provided, defaults to 'generated_model.py'"""
 
     print(f"\nAnalyzing TensorBoard logs and generating improved model code...")
 
+    # Suppress TensorBoard logging of warnings to avoid cluttering the output
+    logging.getLogger('tensorboard').setLevel(logging.ERROR)
+    logging.getLogger('tensorboard.backend.event_processing').setLevel(logging.ERROR)
+
     # Get TensorBoard log directories
-    log_dir = "tb_logs"
-    experiment_dir = "fashion_mnist"
     version_dirs = glob.glob(f"{log_dir}/{experiment_dir}/*")
 
     if not version_dirs:
@@ -22,7 +26,7 @@ def generate_model_pipeline(
 
     # Generate model code from GPT
     try:
-        model_code = get_gpt_model_code_from_tb_with_current_model(version_dirs)
+        model_code = get_gpt_model_code_from_tb_with_current_model(version_dirs, current_model_path)
 
         # Save the code to a file
         saved_file = save_model_code_to_file(model_code, output_filename)

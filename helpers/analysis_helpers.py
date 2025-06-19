@@ -1,21 +1,25 @@
 import os
 from datetime import datetime
-from tensorboard.backend.event_processing import event_accumulator
 from gpt_api import get_gpt_analysis_from_tb
 import glob
+import logging
 
-def analysis_pipeline(log_dir="tb_logs", experiment_dir="fashion_mnist"):
+def analysis_pipeline(log_dir="tb_logs", experiment_dir="fashion_mnist", analysis_dir="analysis_results"):
     """Main pipeline function for the analysis agent command. 
     Analyze model performance across experiments and identify patterns.
-    
+    Args:
+        log_dir: Path to TensorBoard logs.
+        experiment_dir: Path to specific experiment directory. If None, analyze all.
+        analysis_dir: Path to save the analysis results.
+
     Returns:
         Dictionary with performance analysis and recommendations
     """
 
-    if event_accumulator is None:
-        print("TensorBoard not installed. Cannot analyze logs.")
-        return None
-        
+    # Suppress TensorBoard logging of warnings to avoid cluttering the output
+    logging.getLogger('tensorboard').setLevel(logging.ERROR)
+    logging.getLogger('tensorboard.backend.event_processing').setLevel(logging.ERROR)
+
     # Find TensorBoard log directories for the given experiment
     version_dirs = glob.glob(f"{log_dir}/{experiment_dir}/*")
     print(version_dirs)
@@ -24,7 +28,7 @@ def analysis_pipeline(log_dir="tb_logs", experiment_dir="fashion_mnist"):
     tb_analysis = get_tb_logs_analysis(version_dirs)
 
     # Save analysis to file
-    save_analysis_to_file(analysis_dir="analysis_results", version_dirs=version_dirs, results=tb_analysis)
+    save_analysis_to_file(analysis_dir=analysis_dir, version_dirs=version_dirs, results=tb_analysis)
 
     return tb_analysis
 
