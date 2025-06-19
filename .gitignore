@@ -20,3 +20,4 @@ wandb/
 .env.production.local
 .venv/
 analysis_results/
+models/

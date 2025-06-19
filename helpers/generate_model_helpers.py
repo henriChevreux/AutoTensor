@@ -2,8 +2,10 @@ import os
 import glob
 from gpt_api import get_gpt_model_code_from_tb_with_current_model
 import logging
+from datetime import datetime
 
 def generate_model_pipeline(
+        output_folder="models",
         output_filename = 'generated_model.py', 
         log_dir="tb_logs", 
         experiment_dir="fashion_mnist",
@@ -28,8 +30,16 @@ def generate_model_pipeline(
     try:
         model_code = get_gpt_model_code_from_tb_with_current_model(version_dirs, current_model_path)
 
-        # Save the code to a file
-        saved_file = save_model_code_to_file(model_code, output_filename)
+        # Create output folder for the model
+        output_folder = os.path.join(output_folder, experiment_dir)
+        os.makedirs(output_folder, exist_ok=True)
+
+        # Create timestamp for the model
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_filename = f"{timestamp}_{output_filename}"
+
+        # Save the code to a file in the output folder
+        saved_file = save_model_code_to_file(model_code, output_folder, output_filename)
         if saved_file:
             print(f"\n✅ Model code generated and saved to: {saved_file}")
             print("\nYou can now:")
@@ -42,13 +52,13 @@ def generate_model_pipeline(
     except Exception as e:
         print(f"❌ Error generating model: {e}")
 
-def save_model_code_to_file(code_content, filename="generated_model.py"):
+def save_model_code_to_file(code_content, folder_path, filename="generated_model.py"):
     """Save generated model code to a Python file"""
     try:
-        with open(os.path.join(os.getcwd(), filename), 'w') as f:
+        with open(os.path.join(folder_path, filename), 'w') as f:
             f.write(code_content)
-        print(f"Model code saved to {filename}")
-        return filename
+        print(f"Model code saved to {os.path.join(folder_path, filename)}")
+        return os.path.join(folder_path, filename)
     except Exception as e:
         print(f"Error saving file: {e}")
         return None
