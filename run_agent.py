@@ -10,22 +10,35 @@ import threading
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+# Fix for terminal echo after os.execv restart
+if sys.stdin.isatty():
+    try:
+        import termios
+        fd = sys.stdin.fileno()
+        attrs = termios.tcgetattr(fd)
+        attrs[3] |= termios.ECHO  # lflags
+        termios.tcsetattr(fd, termios.TCSANOW, attrs)
+    except Exception:
+        pass  # Not a tty or not supported, ignore
+
 WATCHED_DIRS = ['.']  # Add more directories as needed
 
 class ReloadHandler(FileSystemEventHandler):
     def __init__(self):
         super().__init__()
-        self.last_reload = time.time()
+        self.last_reload = 0
 
     def on_modified(self, event):
-        # Debounce rapid changes
-        if time.time() - self.last_reload < 1:
-            return
-        self.last_reload = time.time()
-        print("\nDetected code change. Reloading agent...")
-        # Restart the current process
-        python = sys.executable
-        os.execv(python, [python] + sys.argv)
+        # Only react to .py file changes
+        if not event.is_directory and event.src_path.endswith('.py'):
+            # Debounce rapid changes
+            if time.time() - self.last_reload < 1:
+                return
+            self.last_reload = time.time()
+            print("\nDetected code change. Reloading agent...")
+            # Restart the current process
+            python = sys.executable
+            os.execv(python, [python] + sys.argv)
 
 def start_watcher():
     event_handler = ReloadHandler()
