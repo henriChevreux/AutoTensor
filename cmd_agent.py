@@ -4,14 +4,10 @@ FashionMNIST Training Agent - An interactive AI agent for configuring and traini
 
 import argparse
 import cmd
-import glob
-import re
-import numpy as np
-
-from tensorvision import TensorVision
 from prompts import get_intro_prompt, get_cmd_prompt
 from helpers.generate_model_helpers import generate_model_pipeline
 from helpers.analysis_helpers import analysis_pipeline
+from helpers.train_helpers import train_pipeline
 
 class TrainingAgent(cmd.Cmd):
     """Interactive command-line agent for configuring and training FashionMNIST models"""
@@ -22,22 +18,16 @@ class TrainingAgent(cmd.Cmd):
     def __init__(self):
         super().__init__()
         self.results = None
-        self.pipeline = None
+        self.model_module = "models.fashion_mnist.model_1"
+        self.model_class = "FashionMNISTCNN"
+        self.best_model_checkpoint = None
     
     def do_train(self, arg):
         """Train the model with current hyperparameters.
         
         Usage: train"""
-        print("\nStarting training with these hyperparameters:")
-        
-        # Create and train the model
-        self.pipeline = TensorVision()
-        self.results = self.pipeline.train()
-        
-        # Print and save results
-        print("\nTraining complete!")
-        print(f"Best model path: {self.results['best_model_path']}")
-        print(f"Best validation accuracy: {self.results['best_model_score']:.4f}")
+        best_model_checkpoint = train_pipeline(self.model_module, self.model_class)
+        self.best_model_checkpoint = best_model_checkpoint
     
     def do_exit(self, arg):
         """Exit the program.

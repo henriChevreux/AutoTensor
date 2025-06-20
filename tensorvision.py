@@ -9,8 +9,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping, LearningRateMonitor
 
 from data import FashionMNISTDataModule
-from generated_model import FashionMNISTCNN
-# from callbacks import FeatureVisualizationCallback, GradientHistogramCallback, ModelExplainabilityCallback
+import importlib
 
 class TensorVision:
     """High-level API for managing the FashionMNIST CNN training pipeline with comprehensive logging"""
@@ -29,6 +28,8 @@ class TensorVision:
         devices: int = 1,
         precision: str = "32-true",
         checkpoint_dir: str = "checkpoints",
+        model_module: str = "generated_model",
+        model_class: str = "FashionMNISTCNN",
         **kwargs
     ):
         """
@@ -49,6 +50,12 @@ class TensorVision:
             checkpoint_dir: Directory to save model checkpoints
             **kwargs: Additional arguments to pass to the trainer
         """
+        # Import the model dynamically
+        self.model_module_name = model_module
+        self.model_class_name = model_class
+        model_module = importlib.import_module(model_module)
+        model_class = getattr(model_module, model_class)
+        
         # Set random seed
         pl.seed_everything(seed)
         
@@ -79,7 +86,7 @@ class TensorVision:
             num_workers=num_workers
         )
         
-        self.model = FashionMNISTCNN(
+        self.model = model_class(
             learning_rate=learning_rate,
             weight_decay=weight_decay,
             dropout_rate=dropout_rate
@@ -145,6 +152,7 @@ class TensorVision:
     
     def train(self) -> Dict[str, Any]:
         """Train the model and return metrics"""
+        print(f"Training model from {self.model_module_name} with class {self.model_class_name}")
         # Train model
         self.trainer.fit(self.model, self.data_module)
         
@@ -162,7 +170,7 @@ class TensorVision:
     
     def load_checkpoint(self, checkpoint_path: str) -> None:
         """Load model from checkpoint"""
-        self.model = FashionMNISTCNN.load_from_checkpoint(checkpoint_path)
+        self.model = self.model.load_from_checkpoint(checkpoint_path)
     
     def predict(self, dataloader: Optional[Any] = None):
         """Run prediction on dataloader or test dataloader if None"""
