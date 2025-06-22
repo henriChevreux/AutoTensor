@@ -19,7 +19,7 @@ def get_model_analysis_prompt(tb_data):
                 {tb_data}
 
                 Please analyze this data and provide insights on how to make the model perform better.
-                Please also provide a recommendation for the next version of the model.
+                Please also provide a recommendation for the next version of the model. The name of the model class should be the same as the name in the model file.
                 Please also provide a recommendation for the hyperparameters for the next version of the model.
                 Please also provide a recommendation for the architecture for the next version of the model.
                 Please also provide a recommendation for the loss function for the next version of the model.
