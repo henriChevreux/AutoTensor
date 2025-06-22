@@ -7,7 +7,7 @@ import cmd
 from prompts import get_intro_prompt, get_cmd_prompt
 from helpers.generate_model_helpers import generate_model_pipeline
 from helpers.analysis_helpers import analysis_pipeline
-from helpers.train_helpers import train_pipeline
+from helpers.train_helpers import train_pipeline, get_latest_model_module
 
 class TrainingAgent(cmd.Cmd):
     """Interactive command-line agent for configuring and training FashionMNIST models"""
@@ -18,6 +18,8 @@ class TrainingAgent(cmd.Cmd):
     def __init__(self):
         super().__init__()
         self.results = None
+        self.models_dir = "models"
+        self.experiment_name = "fashion_mnist"
         self.model_module = "models.fashion_mnist.model_1"
         self.model_class = "FashionMNISTCNN"
         self.best_model_checkpoint = None
@@ -26,7 +28,9 @@ class TrainingAgent(cmd.Cmd):
         """Train the model with current hyperparameters.
         
         Usage: train"""
-        best_model_checkpoint = train_pipeline(self.model_module, self.model_class)
+        latest_model_module = get_latest_model_module(self.models_dir, self.experiment_name)
+        print(f"Latest model found: {latest_model_module}")
+        best_model_checkpoint = train_pipeline(latest_model_module, self.model_class)
         self.best_model_checkpoint = best_model_checkpoint
     
     def do_exit(self, arg):

@@ -152,7 +152,7 @@ class TensorVision:
     
     def train(self) -> Dict[str, Any]:
         """Train the model and return metrics"""
-        print(f"Training model from {self.model_module_name} with class {self.model_class_name}")
+        print(f"Training model {self.model_class_name} from {self.model_module_name}")
         # Train model
         self.trainer.fit(self.model, self.data_module)
         

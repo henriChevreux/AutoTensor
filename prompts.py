@@ -48,5 +48,6 @@ def get_model_code_generation_prompt(tb_data, current_model_code):
                 4. Optimize the architecture based on the training patterns
                 5. Use better hyperparameters if needed
 
+                The name of the model class should be the same as the name in the model file.
                 Return ONLY the Python code, no explanations or markdown formatting.
                 """)
