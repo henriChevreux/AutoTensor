@@ -2,17 +2,22 @@ import os
 import glob
 from gpt_api import get_gpt_model_code_from_tb_with_current_model
 import logging
-from helpers.helpers import generate_filename
+from helpers.helpers import generate_filename, get_max_version
 
 def generate_model_pipeline(
         output_folder="models",
         log_dir="tb_logs", 
         experiment_name="fashion_mnist",
-        current_model_path="model.py"):
+        current_model_path=None):
     """Generate a new model based on TensorBoard analysis and save it as a Python file.
     """
 
     print(f"\nAnalyzing TensorBoard logs and generating improved model code...")
+
+    if current_model_path is None:
+        current_model_path = get_latest_model_path(output_folder, experiment_name)
+
+    print(f"Latest model path: {current_model_path}")
 
     # Suppress TensorBoard logging of warnings to avoid cluttering the output
     logging.getLogger('tensorboard').setLevel(logging.ERROR)
@@ -60,3 +65,9 @@ def save_model_code_to_file(code_content, folder_path, filename="generated_model
     except Exception as e:
         print(f"Error saving file: {e}")
         return None
+    
+def get_latest_model_path(models_dir, experiment_name):
+    """Get the latest model path from the models directory"""
+    models_path = f"{models_dir}/{experiment_name}"
+    max_version = get_max_version(models_path, "model", "py")
+    return f"{models_dir}/{experiment_name}/model_{max_version}.py"
