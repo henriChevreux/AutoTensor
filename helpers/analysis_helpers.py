@@ -61,7 +61,7 @@ def get_tb_logs_analysis(version_dirs):
 
 
 
-def save_analysis_to_file(output_dir, version_dirs=None, results=None, filename="analysis.txt"):
+def save_analysis_to_file(output_dir, version_dirs=None, results=None, filename="analysis_0.txt"):
     """Save the analysis to a file"""
     # Create output directory for analysis results
     os.makedirs(output_dir, exist_ok=True)
