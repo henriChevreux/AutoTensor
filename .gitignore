@@ -21,3 +21,4 @@ wandb/
 .venv/
 analysis_results/
 models/
+.DS_Store

@@ -31,6 +31,9 @@ class ReloadHandler(FileSystemEventHandler):
     def on_modified(self, event):
         # Only react to .py file changes
         if not event.is_directory and event.src_path.endswith('.py'):
+            # Ignore changes in the models folder
+            if 'models' in event.src_path:
+                return
             # Debounce rapid changes
             if time.time() - self.last_reload < 1:
                 return

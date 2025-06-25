@@ -61,6 +61,24 @@ class TrainingAgent(cmd.Cmd):
         
         If no filename is provided, defaults to 'generated_model.py'"""
         generate_model_pipeline()
+    
+    def do_auto_learn(self, arg):
+        """Loop n times through the following steps:
+        1. Train the model
+        2. Analyze the model
+        3. Generate a new model
+        Usage: auto_learn <number of times to loop>"""
+        n = int(arg)
+        print(f"Auto learning {n} times...")
+        print("--------------------------------")
+        for i in range(n):
+            print(f"Auto learning iteration {i+1} of {n}...")
+            self.do_train("")
+            self.do_analysis("")
+            self.do_generate_model("") 
+            print("--------------------------------")
+        print("Auto learning complete!")
+
 
 def main():
     parser = argparse.ArgumentParser(description="FashionMNIST Training Agent")
