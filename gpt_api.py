@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 import os
 from prompts import get_model_analysis_prompt, get_model_code_generation_prompt
-from helpers.tb_helpers import extract_tensorboard_events
+from helpers.tb_helpers import extract_tensorboard_events, extract_analysis_data
 
 def get_gpt_analysis_from_tb(context_file_paths):
     """Get analysis from GPT based on TensorBoard logs.
@@ -43,11 +43,12 @@ def get_gpt_analysis_from_tb(context_file_paths):
 
     return completion.choices[0].message.content
 
-def get_gpt_model_code_from_tb_with_current_model(context_file_paths, current_model_path):
+def get_gpt_model_code_from_tb_with_current_model(context_file_paths, analysis_file_path, current_model_path):
     """Get model code from GPT based on TensorBoard analysis and current model.
     
     Args:
         context_file_paths: List of TensorBoard log directories.
+        analysis_file_path: Path to the analysis file.
         current_model_path: Path to the current model code.
 
     Returns:
@@ -66,6 +67,9 @@ def get_gpt_model_code_from_tb_with_current_model(context_file_paths, current_mo
     for version_dir in context_file_paths:
         events_data = extract_tensorboard_events(version_dir)
         all_data[version_dir] = events_data
+
+    # Extract analysis data
+    analysis_data = extract_analysis_data(analysis_file_path)
 
     load_dotenv(Path(".env"))
     api_key = os.getenv("OPENAI_API_KEY")
@@ -86,7 +90,7 @@ def get_gpt_model_code_from_tb_with_current_model(context_file_paths, current_mo
             },
             {
                 "role": "user",
-                "content": get_model_code_generation_prompt(all_data, current_model_code)
+                "content": get_model_code_generation_prompt(all_data, analysis_data, current_model_code)
             }
         ],
         temperature=0.1 # Reduce randomness in the model's output

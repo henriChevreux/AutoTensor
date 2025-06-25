@@ -86,11 +86,7 @@ class TensorVision:
             num_workers=num_workers
         )
         
-        self.model = model_class(
-            learning_rate=learning_rate,
-            weight_decay=weight_decay,
-            dropout_rate=dropout_rate
-        )
+        self.model = model_class()
         
         # Initialize tensorboard logger
         self.logger = TensorBoardLogger(

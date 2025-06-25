@@ -28,7 +28,7 @@ def get_model_analysis_prompt(tb_data):
                 
             """)
 
-def get_model_code_generation_prompt(tb_data, current_model_code):
+def get_model_code_generation_prompt(tb_data, analysis_data, current_model_code):
     return str(f"""
                 Here is my current FashionMNIST model code:
 
@@ -36,9 +36,13 @@ def get_model_code_generation_prompt(tb_data, current_model_code):
                 {current_model_code}
                 ```
 
-                And here is the TensorBoard training data from my experiments:
+                Here is the TensorBoard log data:
 
                 {tb_data}
+                
+                Here is the analysis of the TensorBoard log data:
+
+                {analysis_data}
 
                 Based on this analysis, please provide an improved version of my model that addresses any issues found in the training patterns.
                 The improved model should:

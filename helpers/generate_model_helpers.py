@@ -2,11 +2,12 @@ import os
 import glob
 from gpt_api import get_gpt_model_code_from_tb_with_current_model
 import logging
-from helpers.helpers import generate_filename, get_max_version
+from helpers.helpers import generate_filename, get_max_version, get_sorted_files_by_version, get_max_filename
 
 def generate_model_pipeline(
         output_folder="models",
-        log_dir="tb_logs", 
+        log_dir="tb_logs",
+        analysis_dir="analysis_results",
         experiment_name="fashion_mnist",
         current_model_path=None):
     """Generate a new model based on TensorBoard analysis and save it as a Python file.
@@ -25,6 +26,14 @@ def generate_model_pipeline(
 
     # Get TensorBoard log directories
     version_dirs = glob.glob(f"{log_dir}/{experiment_name}/*")
+    # Sort dirs by version number
+    version_dirs = get_sorted_files_by_version(version_dirs, "version", None)
+
+    # Get latest version of analysis
+    analysis_dir = str(f"{analysis_dir}/{experiment_name}")
+    latest_analysis_filepath = os.path.join(analysis_dir, get_max_filename(analysis_dir, "analysis", "txt"))
+    print("latest_analysis_filepath", latest_analysis_filepath)
+
     output_folder = os.path.join(output_folder, experiment_name)
 
     if not version_dirs:
@@ -33,7 +42,7 @@ def generate_model_pipeline(
 
     # Generate model code from GPT
     try:
-        model_code = get_gpt_model_code_from_tb_with_current_model(version_dirs, current_model_path)
+        model_code = get_gpt_model_code_from_tb_with_current_model(version_dirs, latest_analysis_filepath, current_model_path)
 
         # Create output folder for the model
         os.makedirs(output_folder, exist_ok=True)

@@ -3,7 +3,6 @@ import numpy as np
 import struct
 from google.protobuf.json_format import MessageToDict
 
-
 def extract_tensorboard_events(event_file_path):
     """Extract comprehensive data from a TensorBoard event file.
     
@@ -79,3 +78,8 @@ def extract_tensorboard_events(event_file_path):
                 data['hyperparameters'][tag] = content
     
     return data
+
+def extract_analysis_data(analysis_file_path):
+    """Extract analysis data from a file."""
+    with open(analysis_file_path, 'r') as f:
+        return f.read()
